@@ -7,7 +7,6 @@
 
 - name: Downloading the EPEL repository definitions.
   get_url: url=http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm dest={{ ansible_env.HOME }}/nagios/epel-release-6-8.noarch.rpm
-  when: is_centos
 
 - name: Downloading and enable the EPEL repository definitions.
   yum: name={{ ansible_env.HOME }}/nagios//epel-release-6-8.noarch.rpm state=present
@@ -26,7 +25,6 @@
    - perl-devel
    - wget
    - python-passlib
-  when: is_centos
 
 - name: Install plugin prerequisites for CentOS
   yum: pkg={{ item }} state=present
@@ -38,7 +36,6 @@
    - radiusclient-ng-devel
    - samba-client
    - libsmbclient
-  when: is_centos
 
 - name: Create nagcmd group
   group: name=nagcmd state=present
@@ -63,7 +60,6 @@
 
 - name: Configure
   shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && ./configure --with-command-group=nagcmd creates={{ ansible_env['HOME'] }}/nagios/{{ nagiossrc }}/Makefile
-  when: is_centos
 
 - name: Make all
   shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && make all creates={{ ansible_env['HOME'] }}/nagios/{{ nagiossrc }}/base/nagios
@@ -83,7 +79,6 @@
 - name: Make install-webconf
   shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && make install-webconf creates=/etc/httpd/conf.d/nagios.conf
   notify: restart apache
-  when: is_centos
 
 - name: Make install-init
   shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && make install-init creates=/etc/init.d/nagios
