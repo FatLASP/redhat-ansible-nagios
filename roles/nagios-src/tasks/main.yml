@@ -28,22 +28,6 @@
    - python-passlib
   when: is_centos
 
-- name: Install Nagios prerequisites for Debian
-  apt: pkg={{ item }} state=present
-  with_items:
-   - linux-headers-{{ ansible_kernel }}
-   - build-essential
-   - python-passlib
-  when: is_debian
-
-- name: Install Nagios prerequisites for Ubuntu
-  apt: pkg={{ item }} state=present
-  with_items:
-   - linux-headers-{{ ansible_kernel }}
-   - build-essential
-   - python-passlib
-  when: is_ubuntu
-
 - name: Install plugin prerequisites for CentOS
   yum: pkg={{ item }} state=present
   with_items:
@@ -55,32 +39,6 @@
    - samba-client
    - libsmbclient
   when: is_centos
-
-- name: Install Plugin prerequisites for Debian
-  apt: pkg={{ item }} state=present
-  with_items:
-   - libssl-dev
-   - dnsutils
-   - fping
-   - libldap2-dev
-   - libpq-dev
-   - libradiusclient-ng-dev
-   - smbclient
-   - gawk
-  when: is_debian
-
-- name: Install Plugin prerequisites for Ubuntu
-  apt: pkg={{ item }} state=present
-  with_items:
-   - libssl-dev
-   - dnsutils
-   - fping
-   - libldap2-dev
-   - libpq-dev
-   - libradiusclient-ng-dev
-   - smbclient
-   - gawk
-  when: is_ubuntu
 
 - name: Create nagcmd group
   group: name=nagcmd state=present
@@ -107,14 +65,6 @@
   shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && ./configure --with-command-group=nagcmd creates={{ ansible_env['HOME'] }}/nagios/{{ nagiossrc }}/Makefile
   when: is_centos
 
-- name: Configure
-  shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && ./configure --with-command-group=nagcmd creates={{ ansible_env['HOME'] }}/nagios/{{ nagiossrc }}/Makefile
-  when: is_debian
-
-- name: Configure
-  shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && ./configure --with-command-group=nagcmd -with-httpd_conf=/etc/apache2/conf-available creates={{ ansible_env['HOME'] }}/nagios/{{ nagiossrc }}/Makefile
-  when: is_ubuntu
-
 - name: Make all
   shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && make all creates={{ ansible_env['HOME'] }}/nagios/{{ nagiossrc }}/base/nagios
 
@@ -134,20 +84,6 @@
   shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && make install-webconf creates=/etc/httpd/conf.d/nagios.conf
   notify: restart apache
   when: is_centos
-
-- name: Make install-webconf
-  shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && make install-webconf creates=/etc/apache2/conf.d/nagios.conf
-  notify: restart apache
-  when: is_debian
-
-- name: Make install-webconf
-  shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && make install-webconf creates=/etc/apache2/conf-available/nagios.conf
-  when: is_ubuntu
-
-- name: Activate Nagios site on Ubuntu 14.04
-  file: src=/etc/apache2/conf-available/nagios.conf dest=/etc/apache2/conf-enabled/nagios.conf state=link owner=root group=root
-  notify: restart apache
-  when: is_ubuntu
 
 - name: Make install-init
   shell: cd {{ ansible_env.HOME }}/nagios/{{ nagiossrc }} && make install-init creates=/etc/init.d/nagios
@@ -182,12 +118,6 @@
 - name: Ensure Nagios is started
   service: name=nagios state=started enabled=yes
 
-- name: Fix Nagios startup on Debian
-  shell: cd /etc/rc2.d && ln -s ../init.d/nagios S18nagios creates=/etc/rc2.d/S18nagios
-  #file: src=/etc/init.d/nagios dest=/etc/rc2.d/S99nagios state=link owner=root group=root
-  when: is_debian
-
 - name: Check if SELinux is running in enforcing mode and change access
   file: path=/usr/local/nagios setype=httpd_sys_content_t state=directory recurse=yes
   when: ansible_selinux != False and ansible_selinux.mode == "enforcing"
-
