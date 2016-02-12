@@ -1,5 +1,4 @@
 This is an Ansible Playbook which installs Nagios from source.
 
-Please check the website for more information:
-- http://networklore.com/ansible-install-nagios/
+Modified for redhat only from http://networklore.com/ansible-install-nagios/
 
